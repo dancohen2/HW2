@@ -1,8 +1,12 @@
 package il.ac.tau.cs.software1.bigram;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.classfile.BufWriter;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -149,14 +153,55 @@ public class BigramModel {
      * @pre: fileName is a legal file path
      */
     public void saveModel(String fileName) throws IOException { // Question 3
-        // TODO: implement
+        File fileVoc = new File(fileName + VOC_FILE_SUFFIX);
+        File fileCounts = new File(fileName + COUNTS_FILE_SUFFIX);
+
+        BufferedWriter vocBufferedWriter = new BufferedWriter(new FileWriter(fileVoc));
+        BufferedWriter countsBufferedWriter = new BufferedWriter(new FileWriter(fileCounts));
+
+        vocBufferedWriter.write(mVocabulary.length + " words" + System.lineSeparator());
+        for(int i=0; i < mVocabulary.length; i++){
+            vocBufferedWriter.write(i + "," + mVocabulary[i] + System.lineSeparator());
+        }
+
+        for(int i=0; i < mBigramCounts.length; i++){
+            for(int j=0; j < mBigramCounts[i].length; j++){
+                if(mBigramCounts[i][j] != 0){
+                    countsBufferedWriter.write(i + "," + j + ":" + mBigramCounts[i][j] + System.lineSeparator());
+                }
+            }
+        }
+        vocBufferedWriter.close();
+        countsBufferedWriter.close();
     }
 
     /*
      * @pre: fileName is a legal file path
      */
     public void loadModel(String fileName) throws IOException { // Question 4
-        // TODO: implement
+        File fileVoc = new File(fileName + VOC_FILE_SUFFIX);
+        File fileCounts = new File(fileName + COUNTS_FILE_SUFFIX);
+
+        BufferedReader vocBufferedReader = new BufferedReader(new FileReader(fileVoc));
+        BufferedReader countsBufferedReader = new BufferedReader(new FileReader(fileCounts));
+
+        String line = vocBufferedReader.readLine();
+        int vocabulary_length = Integer.parseInt(line.split(" ")[0]);
+        mVocabulary = new String[vocabulary_length];
+
+        while((line = vocBufferedReader.readLine()) != null){
+            String[] tokens = line.split(",");
+            mVocabulary[Integer.parseInt(tokens[0])] = tokens[1];
+        }
+
+        mBigramCounts = new int[vocabulary_length][vocabulary_length];
+        while((line = countsBufferedReader.readLine()) != null){
+            String[] tokens = line.split("[,:]");
+            mBigramCounts[Integer.parseInt(tokens[0])][Integer.parseInt(tokens[1])] = Integer.parseInt(tokens[2]);
+        }
+
+        vocBufferedReader.close();
+        countsBufferedReader.close();
     }
 
     /*
